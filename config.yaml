@@ -1,0 +1,47 @@
+# Project 6 - Rossmann sales forecasting: central configuration.
+# All paths are RELATIVE to the project root (the folder that contains `config/`, `src/`, `data/` ...).
+# src/utils/config.py resolves them from the location of this file, so nothing depends on the
+# directory from which Jupyter or Python was started.
+project:
+  name: rossmann_sales_forecasting
+  random_seed: 42
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  figures_dir: reports/figures
+  logs_dir: logs
+
+raw_files:
+  train: train.csv
+  test: test.csv
+  store: store.csv
+  sample_submission: sample_submission.csv
+
+processed_files:
+  train: train_processed.parquet
+  test: test_processed.parquet
+  store: store_processed.csv
+  holiday_calendar: holiday_calendar.csv
+  manifest: feature_manifest.json
+  cleaning_report: cleaning_report.json
+
+cleaning:
+  outlier:
+    method: mad                 # robust z-score = |x - median| / (1.4826 * MAD)
+    threshold: 5.0
+    group_cols: [Store, DayOfWeek, Promo]   # compare a day only with similar days of the same store
+    action: flag                # flag | clip | drop   (default: flag, never delete)
+
+features:
+  holiday:
+    cap_days: 30                # DaysToNextHoliday / DaysSinceLastHoliday are capped at this value
+    window_days: 3              # IsBeforeHoliday / IsAfterHoliday = within this many days
+    national_share: 0.95        # a date is "national" if >= 95 % of the stores carry a StateHoliday flag
+  history:
+    validation_days: 42         # 6-week forecast horizon used for the leakage-safe history demo
+
+logging:
+  level: INFO
+  file: project.log
+  format: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
